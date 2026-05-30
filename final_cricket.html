@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="cricket.css">
+    <title>Cricket</title>
+</head>
+<body>
+    <h1>Bat Ball Stump</h1>
+
+    <div class="buttons-row">
+        <button class="choice-btn" onclick="
+        computerChoice = generateComputerChoice();
+        let resultMsg = getResult('Bat', computerChoice);
+        showResult('Bat', computerChoice, resultMsg);
+        ">
+        <img src="images/bat.png" alt="Bat Image" class="choice-image">
+        </button>
+
+        <button class="choice-btn" onclick="
+        computerChoice = generateComputerChoice();
+        resultMsg = getResult('Ball', computerChoice);
+        showResult('Ball', computerChoice, resultMsg);
+        ">
+        <img src="images/ball.png" alt="Ball Image" class="choice-image">
+        </button>
+
+        <button class="choice-btn" onclick="
+        computerChoice = generateComputerChoice();
+        resultMsg = getResult('Stump', computerChoice);
+        showResult('Stump', computerChoice, resultMsg);
+        ">
+        <img src="images/stump.webp" alt="Stump Image" class="choice-image">
+        </button>
+    </div>
+
+    <div class="result-card">
+        <h3 id="user-move"></h3>
+        <h3 id="computer-move"></h3>
+        <h3 id="result"></h3>
+    </div>
+
+    <div class="score-row">
+        <div class="score-pill win"  id="score-win">Won: 0</div>
+        <div class="score-pill lost" id="score-lost">Lost: 0</div>
+        <div class="score-pill tie"  id="score-tie">Tie: 0</div>
+    </div>
+
+    <button onclick="resetScore()">Reset</button>
+
+    <script>
+        let score = loadScore();
+        updateScoreDisplay();
+
+        function loadScore() {
+            let saved = localStorage.getItem('Score');
+            if (saved) {
+                let parsed = JSON.parse(saved);
+                return { win: parsed.win || 0, tie: parsed.tie || 0, lost: parsed.lost || 0 };
+            }
+            return { win: 0, tie: 0, lost: 0 };
+        }
+
+        function resetScore() {
+            localStorage.removeItem('Score');
+            score = { win: 0, tie: 0, lost: 0 };
+            document.querySelector('#user-move').innerText = '';
+            document.querySelector('#computer-move').innerText = '';
+            document.querySelector('#result').innerText = '';
+            updateScoreDisplay();
+        }
+
+        function generateComputerChoice() {
+            let r = Math.random() * 3;
+            if (r <= 1) return 'Bat';
+            if (r <= 2) return 'Ball';
+            return 'Stump';
+        }
+
+        function getResult(userMove, computerMove) {
+            const rules = {
+                Bat:   { Ball: 'win', Bat: 'tie', Stump: 'lost' },
+                Ball:  { Ball: 'tie', Bat: 'lost', Stump: 'win' },
+                Stump: { Ball: 'lost', Bat: 'win', Stump: 'tie' },
+            };
+            let outcome = rules[userMove][computerMove];
+            score[outcome]++;
+            if (outcome === 'win')  return 'You Won! 🥳';
+            if (outcome === 'tie')  return 'Its a Tie 🤝';
+            if (outcome === 'lost') return 'Computer Won 🥳';
+        }
+
+        function showResult(userMove, computerMove, result) {
+            localStorage.setItem('Score', JSON.stringify(score));
+            document.querySelector('#user-move').innerText    = `You chose ${userMove}`;
+            document.querySelector('#computer-move').innerText = `Computer chose ${computerMove}`;
+            document.querySelector('#result').innerText       = result;
+            updateScoreDisplay();
+        }
+
+        function updateScoreDisplay() {
+            document.querySelector('#score-win').innerText  = `Won: ${score.win}`;
+            document.querySelector('#score-lost').innerText = `Lost: ${score.lost}`;
+            document.querySelector('#score-tie').innerText  = `Tie: ${score.tie}`;
+        }
+    </script>
+
+</body>
+</html>     
